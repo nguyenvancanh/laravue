@@ -1,0 +1,44 @@
+version: '2'
+services:
+  application:
+    image: ubuntu:16.04
+    volumes:
+      - ./blog:/var/www/html/blog
+  mariadb:
+    image: mariadb
+    ports:
+      - "3696:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: guest
+      MYSQL_PASSWORD: 123456
+    volumes:
+      - ./mariadb:/var/lib/mysql
+  php:
+    image: soivangoi/php7-fpm:master
+    ports:
+      - "9696:9000"
+    volumes_from:
+      - application
+    links:
+      - mariadb:mysql
+  nginx:
+    image: nginx
+    ports:
+      - "8696:80"
+    links:
+      - php
+    volumes_from:
+      - application
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - "6969:80"
+    links:
+      - mariadb
+    environment:
+      PMA_HOST: mariadb
+      PMA_PORT: 3306
